@@ -1,80 +1,134 @@
-# E-Commerce Store Analysis
+# 🔐 bcrypt: Secure Password Hashing
 
-## Description
+`bcrypt` is a cryptographic hashing function designed for **secure password storage**. It includes **salting**, **key stretching**, and an **adaptive work factor** to make brute-force attacks difficult.
 
-This repository contains a Power Bi dashboard of an E-commerce store to answer questions about the data. The insights of the dashboard can be found in the results.txt file. This repository can be used as a starting point for anyone who wants to learn how to use Power Bi to analyze data.
+---
 
-<!--Analyzed E-commerce store data. Created an interactive dashboard using Power BI.-->
+## 📌 Why Use bcrypt?
 
-## Installation
+✅ **Salted Hashing** - Prevents rainbow table attacks.  
+✅ **Adaptive Work Factor** - Makes cracking attempts slower over time.  
+✅ **Resistant to Brute-Force** - Computation-intensive hashing deters attackers.  
+✅ **Automatic Salt Generation** - Each password gets a unique salt.
 
-To run this project on your machine you need to install <a href="https://powerbi.microsoft.com/en-us/downloads/">Microsoft Power Bi</a>.
+---
 
-<!-- ## Usage
+## 📜 How bcrypt Works
 
-Provide instructions and examples for use. Include screenshots as needed.
+![bcrypt process](https://upload.wikimedia.org/wikipedia/commons/4/46/Bcrypt_stacked.svg)
 
-To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative filepath, add it to your README using the following syntax:
+1. **Generate a random salt** (16 bytes)
+2. **Combine salt + password**
+3. **Hash using Blowfish encryption**
+4. **Repeat hashing 2^cost_factor times**
+5. **Store: `$2a$Cost$Salt$HashedPassword`**
 
-    ```md
-    ![schema](MusicDatabaseSchema.png)
-    ``` -->
+### 🔍 Hash Format Example
+```plaintext
+$2a$12$Nw0HQpo.Dl4XJ0N3pyktqu98UJOnvPtHpLPYjZ1BSuD84h6N7V8O6
+```
+**Breakdown:**
+| Part | Description |
+|------|------------|
+| `$2a$` | bcrypt version |
+| `12` | Cost factor (work factor) |
+| `$Nw0HQpo.Dl4XJ0N3pyktqu` | Salt |
+| `98UJOnvPtHpLPYjZ1BSuD84h6N7V8O6` | Hashed password |
 
-## Tools
+---
 
-- Microsoft Power BI
+## 🚀 Implementation Examples
 
-## Credits
+### **Python (`bcrypt` library)**
+```python
+import bcrypt
 
-Throughout the development of this project, I have sought inspiration from a pivotal video source: https://youtu.be/6cV3OwFrOkk
+password = b"my_secure_password"
+salt = bcrypt.gensalt(rounds=12)
+hashed_password = bcrypt.hashpw(password, salt)
 
-## Badges
+print("Hashed Password:", hashed_password)
 
-![Power Bi](https://img.shields.io/badge/power_bi-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
-![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)
+# Verify password
+entered_password = b"my_secure_password"
+if bcrypt.checkpw(entered_password, hashed_password):
+    print("✅ Password is correct!")
+else:
+    print("❌ Incorrect password!")
+```
 
-## Project Learnings
+### **Node.js (`bcryptjs` library)**
+```javascript
+const bcrypt = require('bcryptjs');
+const password = "my_secure_password";
+const saltRounds = 12;
 
-- Created an interactive dashboard to track and analyze online sales data.
-- Used complex parameters to drill down in worksheet and customization using filters and slicers.
-- Created connections, joined new tables, did calculations to manipulate data, and enabled user-driven parameters for visualization.
-- Used different types of customized visualization (bar chart, pie chart, donut chart, clustered bar chart, scatter chart, line chart, area chart, map, slicers, etc)
+bcrypt.hash(password, saltRounds, (err, hash) => {
+    console.log("Hashed Password:", hash);
 
-## Conclusion
+    // Verify password
+    bcrypt.compare(password, hash, (err, result) => {
+        console.log(result ? "✅ Password is correct!" : "❌ Incorrect password!");
+    });
+});
+```
 
-The project was successful in answering the set of questions about an E-commerce Store's performance. The results of the project can be found in result.txt file.
+---
 
-<!--## How to Contribute
+## ⚙️ Choosing the Right Cost Factor
 
-If you created an application or package and would like other developers to contribute it, you can include guidelines for how to do so. The [Contributor Covenant](https://www.contributor-covenant.org/) is an industry standard, but you can always write your own if you'd prefer.-->
+Higher cost factor increases security but slows performance.
 
-<!-- ## Questions Answered
+| Cost Factor | Approx. Time per Hash |
+|------------|----------------------|
+| **8**  | ~20ms  |
+| **10** | ~100ms |
+| **12** | ~300ms (**Recommended**) |
+| **14** | ~1s    |
+| **16** | ~4s    |
 
-The following questions are answered by the project:
+---
 
-* What are the most popular genres of music?
-* What are the most popular artists?
-* What are the most popular songs?
-* What are the average prices of different types of music?
-* What are the most popular countries for music purchases?
+## 🛑 Common Mistakes to Avoid
 
-## Data Set
+❌ **Using a low cost factor (e.g., 6, 8)** → Easier to brute-force.  
+❌ **Rehashing an already hashed password** → Unnecessary.  
+❌ **Storing bcrypt hashes in plaintext files** → Use a secure database.  
+❌ **Using the same salt for all passwords** → bcrypt generates a unique salt automatically.
 
-The data set used for this project is available on GitHub. The data set contains information about the store's customers, music, and sales.
+---
 
-## Results
+## ⚖️ bcrypt vs. Other Hashing Methods
 
-The results of the project are as follows:
+| Feature       | bcrypt | PBKDF2 | Argon2 | SHA-256 |
+|--------------|--------|--------|--------|---------|
+| **Salted**   | ✅     | ✅     | ✅     | ❌ (manual) |
+| **Adaptive** | ✅     | ✅     | ✅     | ❌ |
+| **Memory-Hard** | ❌ | ❌ | ✅ | ❌ |
+| **Fast on GPUs?** | ❌ (Good) | ✅ (Weak) | ❌ (Best) | ✅ (Weak) |
 
-* The most popular genre of music is pop.
-* The most popular artist is Taylor Swift.
-* The most popular song is "Despacito" by Luis Fonsi and Daddy Yankee.
-* The average price of an album is $10.
-* The most popular country for music purchases is the United States.
+---
 
-## Conclusion
+## 🔎 When Should You NOT Use bcrypt?
 
-The project was successful in answering the set of questions about the store's business performance. The results of the project can be used by the store to make decisions about its marketing and product offerings.
+🚫 **If hashing large amounts of data** → Use SHA-256 instead.  
+🚫 **If protecting short-lived secrets** → bcrypt may be too slow.  
+🚫 **If needing extra GPU resistance** → Use **Argon2id** instead.  
 
+---
 
-I hope this is helpful! -->
+## 🏆 Conclusion
+
+✔️ bcrypt is **one of the best** hashing algorithms for securely storing passwords.  
+✔️ Offers **salting, adaptive work factor, and key stretching** to prevent attacks.  
+✔️ Always use **cost factor ≥ 12** for security against modern attacks.  
+✔️ If available, **consider Argon2id** for even better security.
+
+---
+
+## 📚 Resources
+- [bcrypt Documentation](https://en.wikipedia.org/wiki/Bcrypt)
+- [Node.js bcryptjs](https://www.npmjs.com/package/bcryptjs)
+- [Python bcrypt](https://pypi.org/project/bcrypt/)
+
+🔗 **Want to contribute?** Fork this repository and submit a pull request! 🚀
